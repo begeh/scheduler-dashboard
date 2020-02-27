@@ -40,26 +40,41 @@ class Dashboard extends Component {
     interviewers: {}
   };
 
-  componentDidMount(){
+  componentDidMount() {
     const focused = JSON.parse(localStorage.getItem("focused"));
-    if(focused){
-      this.setState({focused});
+
+    Promise.all([
+      axios.get("/api/days"),
+      axios.get("/api/appointments"),
+      axios.get("/api/interviewers")
+    ]).then(([days, appointments, interviewers]) => {
+      this.setState({
+        loading: false,
+        days: days.data,
+        appointments: appointments.data,
+        interviewers: interviewers.data
+      });
+    });
+
+    if (focused) {
+      this.setState({ focused });
     }
   }
 
-  componentDidUpdate(previousProps, previousState){
-    if(previousState.focused !== this.state.focused){
+  componentDidUpdate(previousProps, previousState) {
+    if (previousState.focused !== this.state.focused) {
       localStorage.setItem("focused", JSON.stringify(this.state.focused));
     }
   }
 
   selectPanel(id) {
-      this.setState(previousState => ({
-        focused: previousState.focused !== null ? null:id
-      }))
+    this.setState(previousState => ({
+      focused: previousState.focused !== null ? null : id
+    }))
   }
 
   render() {
+    console.log(this.state);
     const dashboardClasses = classnames("dashboard", {
       "dashboard--focused": this.state.focused
     });
